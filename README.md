@@ -18,8 +18,9 @@ In Sublime Text 3, go to `Sublime Text > Preferences > Settings - User` and add 
 ```
 {
   "ReactAutocomplete": {
-  	"access_token": "[paste your access token here]"
-    "github_repo": "https://github.com/[your repo]"
+  	"access_token": "[paste your access token here]",
+    "github_repo": "Username/repo",
+    "github_url": "https://github.com/"
   }
 }
 ```
