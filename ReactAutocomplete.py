@@ -5,8 +5,8 @@ import base64
 import urllib
 import re
  
-GITHUB_SEARCH = u"https://github.guidebook.com/api/v3/search/code?q=displayName%20{}+in:file+repo:Guidebook/gears3fe&access_token={}"
-CONTENTS_URL = u"https://github.guidebook.com/api/v3/repos/Guidebook/gears3fe/contents/{}?access_token={}"
+GITHUB_SEARCH = u"{}api/v3/search/code?q=displayName%20{}+in:file+repo:{}&access_token={}"
+CONTENTS_URL = u"{}api/v3/repos/{}/contents/{}?access_token={}"
 
 MIN_WORD_SIZE = 4
 MAX_WORD_SIZE = 50
@@ -114,7 +114,9 @@ class ReactAutocomplete(sublime_plugin.EventListener):
   Runs when user starts typing
   """
   def on_query_completions(self, view, prefix, locations):
-    access_token = view.settings().get("ReactAutocomplete")[0]["access_token"]
+    access_token = view.settings().get("ReactAutocomplete")["access_token"]
+    github_repo = view.settings().get("ReactAutocomplete")["github_repo"]
+    github_url = view.settings().get("ReactAutocomplete")["github_url"]
 
     # Ignore anything shorter or longer than bounds
     if len(prefix) < MIN_WORD_SIZE or len(prefix) > MAX_WORD_SIZE:
@@ -132,7 +134,7 @@ class ReactAutocomplete(sublime_plugin.EventListener):
         # * add and wrap the component
         # * add all props marked as `isRequired`
         print(prefix)
-        search_results = self.load_url(GITHUB_SEARCH.format(prefix, access_token))
+        search_results = self.load_url(GITHUB_SEARCH.format(github_url, prefix, github_repo, access_token))
         print(search_results["total_count"])
         if search_results["total_count"] > 0:
           # item = search_results["items"][0]
@@ -144,7 +146,7 @@ class ReactAutocomplete(sublime_plugin.EventListener):
           
           # only take top 5 components
           for item in search_results["items"][:5]:
-            file = self.load_url(CONTENTS_URL.format(item["path"], access_token))
+            file = self.load_url(CONTENTS_URL.format(github_url, github_repo, item["path"], access_token))
             file_content = base64.b64decode(file['content']).decode('utf-8')
             props = self.find_props(file_content)
             displayName = self.find_display_name(file_content)
