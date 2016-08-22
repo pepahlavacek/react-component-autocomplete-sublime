@@ -4,23 +4,22 @@ import json
 import base64
 import urllib
 import re
- 
-GITHUB_SEARCH = u"{}api/v3/search/code?q=displayName%20{}+in:file+repo:{}&access_token={}"
-CONTENTS_URL = u"{}api/v3/repos/{}/contents/{}?access_token={}"
+import os
 
 MIN_WORD_SIZE = 4
 MAX_WORD_SIZE = 50
 
 class AddRequireCommand(sublime_plugin.TextCommand):
   def run(self, edit, component):
-    check_pattern = u"{} \= require".format(component["displayName"])
+    check_pattern = u"{} \= require".format(component["display_name"])
     if self.view.find(check_pattern, 0):
-      print("require already present")
+      # require is already present, we're done here
+      print("eh")
     else:
       path = re.sub('\.cjsx$', '', component["path"])
-      path = re.sub("src\/scripts\/", "", path)
+      path = re.sub(".*?src\/scripts\/", "", path)
 
-      require_text = "\n{} = require '{}'\n".format(component["displayName"], path)
+      require_text = "\n{} = require '{}'\n".format(component["display_name"], path)
       all_requires = self.view.find_all("[a-zA-Z]* \= require", 0)
       if all_requires:
         insert_at = self.view.line(all_requires[-1]).end()
@@ -34,18 +33,69 @@ class ReactAutocomplete(sublime_plugin.EventListener):
   Provide component name completions for Builder
   """
   def __init__(self):
-    self.last_added_component = None
-    self.component_cache = {}
+    self.components = {}
+    self.component_names = []
+    self.component_name_suggestions = []
+    self.initial_autocomplete_point = None
 
-  """
-  Load data from a url
-  """
-  def load_url(self, url):
-    x = urllib.request.urlopen(url)
-    raw_data = x.read()
-    encoding = x.info().get_content_charset('utf8')  # JSON default
-    data = json.loads(raw_data.decode(encoding))
-    return data
+  def on_load(self, view):
+    self.preload_files(view)
+
+  def find_settings_file(self, view):
+    folders = os.path.dirname(view.file_name()).split("/")
+    settings_path = None
+    for folder in reversed(folders):
+      path = '/'.join(folders)
+      is_file = os.path.isfile(os.path.join(path,".react-autocomplete"))
+      if is_file:
+        settings_path = os.path.join(path,".react-autocomplete")
+        break;
+      del folders[-1]
+
+    return settings_path
+
+  def get_component_folder(self, settings_file):
+    with open(settings_file, 'r', encoding="utf-8") as f:
+      settings_file_contents = f.read()
+      component_folder = os.path.join(os.path.dirname(settings_file), settings_file_contents)
+
+      return component_folder
+
+  def preload_files(self, view):
+    self.components = {}
+    self.component_names = []
+    self.component_name_suggestions = []
+
+    settings_file = self.find_settings_file(view)
+
+    if settings_file:
+      component_folder = self.get_component_folder(settings_file)
+    else:
+      return
+
+    for root, dirs, files in os.walk(component_folder, topdown=False):
+      for name in files:
+        with open(os.path.join(root, name), 'r', encoding='utf-8') as f:
+          file_content = f.read() 
+          display_name = self.find_display_name(file_content)
+          props = self.find_props(file_content)
+
+          suggestion = {
+            "title": "{} \t {}".format(display_name, name),
+            "suggestion": "" + display_name + "\n" + self.get_prop_string(props) + "/>"
+          }
+
+          self.components[display_name] = {
+            "suggestion": suggestion,
+            "props": props,
+            "display_name": display_name,
+            "path": os.path.join(root, name)
+          }
+
+          self.component_names.append(display_name)
+          self.component_names.sort()
+
+    self.component_name_suggestions = [(self.components[name]["suggestion"]["title"], self.components[name]["suggestion"]["suggestion"]) for name in self.component_names]
 
   """
   Find available propTypes for specified file
@@ -56,32 +106,32 @@ class ReactAutocomplete(sublime_plugin.EventListener):
     if findPropTypes:
       start = findPropTypes.start()
     else:
-      print("Couldn't find start, exiting")
+      # print("Couldn't find start, exiting")
       return []
     
     # strip the contents before the line (we don't need them)
-    leftStrippedContents = contents[start:]
+    left_stripped_contents = contents[start:]
 
     # find the first empty line
-    findEmptyLines = re.search(re.compile('^$', re.MULTILINE), leftStrippedContents)
-    if findEmptyLines:
-      end = findEmptyLines.start()
+    find_empty_lines = re.search(re.compile('^$', re.MULTILINE), left_stripped_contents)
+    if find_empty_lines:
+      end = find_empty_lines.start()
     else:
-      print("Couldn't find end, exiting")
+      # print("Couldn't find end, exiting")
       return []
 
     # strip everything after it
-    propTypeString = leftStrippedContents[:end]
+    prop_type_string = left_stripped_contents[:end]
 
     # and loop through the string to build a list of available props
     pattern = re.compile("^[\s]{4}([a-z]*?)\: (.*?)(\.isRequired)?$", re.MULTILINE)
     result = []
-    for (propName, propType, required) in re.findall(pattern, propTypeString):
+    for (prop_name, prop_type, required) in re.findall(pattern, prop_type_string):
       isRequired = False
       if required:
         isRequired = True
 
-      result.append({ "name": propName, "type": propType, "required": isRequired })
+      result.append({ "name": prop_name, "type": prop_type, "required": isRequired })
 
     return result
 
@@ -89,91 +139,44 @@ class ReactAutocomplete(sublime_plugin.EventListener):
   Finds component's displayName
   """
   def find_display_name(self, contents):
-    matchDisplayName = re.search(re.compile('^[\s]{2}displayName\: [\"\'](.*)[\"\']$', re.MULTILINE), contents)
-    if matchDisplayName:
-      return matchDisplayName.group(1)
+    match_display_name = re.search(re.compile('^[\s]{2}displayName\: [\"\'](.*)[\"\']$', re.MULTILINE), contents)
+    if match_display_name:
+      return match_display_name.group(1)
     else:
       return ""
 
-
-  def find_current_file_last_require(self, view):
-    print("FOUND YA")
+  def get_prop_string(self, props):
+    prop_string = ""
+    for prop in props:
+      # if prop["required"]:
+      prop_string = prop_string + "  " + prop["name"] + "={###" + prop["type"] + "###}\n"
+    return prop_string
 
   """
   Runs?
   """
-  def on_query_context(self, view, key, operator, operand, match_all):
-    # print("ON QUERY CONTEXT", key, operator, operand, match_all)
-    # if key is "panel" and operator is "incremental_find":
-    component_name = view.substr(view.word(view.sel()[0].begin()-2))
-    self.last_added_component = component_name
-
-    view.run_command("add_require", {"component": self.component_cache[self.last_added_component]})
+  def on_modified(self, view):
+    if self.initial_autocomplete_point:
+      component_name = (view.substr(view.word(self.initial_autocomplete_point)))
+      print(component_name)
+      if component_name in self.components:
+        view.run_command("add_require", {"component": self.components[component_name]})
+        self.initial_autocomplete_point = None
 
   """
   Runs when user starts typing
   """
   def on_query_completions(self, view, prefix, locations):
-    access_token = view.settings().get("ReactAutocomplete")["access_token"]
-    github_repo = view.settings().get("ReactAutocomplete")["github_repo"]
-    github_url = view.settings().get("ReactAutocomplete")["github_url"]
+    self.preload_files(view)
+    self.initial_autocomplete_point = None
 
-    # Ignore anything shorter or longer than bounds
-    if len(prefix) < MIN_WORD_SIZE or len(prefix) > MAX_WORD_SIZE:
-      return []
-
-    # Ignore anything that's not JSX
     if view.match_selector(locations[0], "jsx.tag-area.coffee"):
+      self.initial_autocomplete_point = locations[0] - len(prefix)
       cursor_start = locations[0] - len(prefix) - 1
       is_start_of_component = view.substr(sublime.Region(cursor_start, cursor_start + 1)) == "<"
 
       if is_start_of_component:
-        # we're adding a new component here
-        # on select, it should
-        # * add the require statement
-        # * add and wrap the component
-        # * add all props marked as `isRequired`
-        print(prefix)
-        search_results = self.load_url(GITHUB_SEARCH.format(github_url, prefix, github_repo, access_token))
-        print(search_results["total_count"])
-        if search_results["total_count"] > 0:
-          # item = search_results["items"][0]
-          # print(displayName, props)
-
-          # if displayName and props
-          # return [("{} \t {}".format(item["name"], item["path"]), item["name"]) for item in search_results["items"]]
-          components = []
-          
-          # only take top 5 components
-          for item in search_results["items"][:5]:
-            file = self.load_url(CONTENTS_URL.format(github_url, github_repo, item["path"], access_token))
-            file_content = base64.b64decode(file['content']).decode('utf-8')
-            props = self.find_props(file_content)
-            displayName = self.find_display_name(file_content)
-            
-            propString = ""
-            for prop in props:
-              # if prop["required"]:
-              propString = propString + "  " + prop["name"] + "={###" + prop["type"] + "###}\n"
-
-            suggestion = {
-              "title": "{} \t {}".format(item["name"], item["path"]),
-              "suggestion": "" + displayName + "\n" + propString + "/>"
-            }
-            self.component_cache[displayName] = {
-              "suggestion": suggestion,
-              "props": props,
-              "displayName": displayName,
-              "path": item["path"]
-            }
-            components.append(suggestion)
-
-          return [(component["title"], component["suggestion"]) for component in components]
-        else:
-          print("no items found")
-          return []
-
-
+        return self.component_name_suggestions
       else:
         # we want to get list of available props
         # file = self.load_url(CONTENTS_URL.format(items["GuideDashboard"], ACCESS_TOKEN))
@@ -181,8 +184,5 @@ class ReactAutocomplete(sublime_plugin.EventListener):
         # sugs = [("{} \t {} \t {}".format(prop["name"], prop["type"], prop["required"]), "{}=''".format(prop["name"]) ) for prop in props]
         # return sugs
         return []
-
     else:
       return []
-
-    return []
