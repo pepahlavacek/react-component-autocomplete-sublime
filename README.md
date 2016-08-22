@@ -1,10 +1,10 @@
-# (Very much work in progress, don't download it yet)
 # Sublime Text React Component Autocomplete
+Work in progress.
 
 ## Overview
-This sublime package autocompletes react components from a selected repository.
-When you start typing `<ComponentName...` it searches a preselected repo and suggests existing components with their props.
-Once you select a component, it also automatically appends a `require` statement for it.
+This sublime package autocompletes react components.
+When you start typing `<ComponentName...` it searches a specified folder in the project and suggests existing components with their props.
+Once you select a component, it also automatically appends a `require` statement after last existing require, or at the top of the file.
 
 ## Limitations
 Right now it only works for `cjsx` components in a very specific format.
@@ -14,13 +14,10 @@ Clone this repo into `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/R
 
 [Generate an access token](https://github.com/settings/tokens)
 
-In Sublime Text 3, go to `Sublime Text > Preferences > Settings - User` and add the following settings:
+Add file named `.react-autocomplete` to your project's root folder.
+The only contents of the file should be a path the component folder of the project (folder with components you'd like to autocomplete).
+
+For example:
 ```
-{
-  "ReactAutocomplete": {
-  	"access_token": "[paste your access token here]",
-    "github_repo": "Username/repo",
-    "github_url": "https://github.com/"
-  }
-}
+src/scripts/components
 ```
