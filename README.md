@@ -18,4 +18,8 @@ Add file named `.react-autocomplete` to your project's root folder.
 src/scripts/components
 ```
 
-The only contents of the file should be path to the component folder (folder containing components you'd like to autocomplete).
+It should only contain a path to the component folder (folder containing components you'd like to autocomplete).
+
+## To Do
+- [ ] Use relative path in `require` statements
+- [ ] Replace any file extension in `require` statements, not just `cjsx`
