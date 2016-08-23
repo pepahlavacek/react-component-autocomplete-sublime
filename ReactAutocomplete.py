@@ -49,7 +49,7 @@ class ReactAutocomplete(sublime_plugin.EventListener):
       is_file = os.path.isfile(os.path.join(path,".react-autocomplete"))
       if is_file:
         settings_path = os.path.join(path,".react-autocomplete")
-        break;
+        break
       del folders[-1]
 
     return settings_path
@@ -60,6 +60,97 @@ class ReactAutocomplete(sublime_plugin.EventListener):
       component_folder = os.path.join(os.path.dirname(settings_file), settings_file_contents)
 
       return component_folder
+
+  def clean_prop_type(self, prop_type):
+    stripped_prop_type = re.sub(r"[\s]*", '', prop_type)
+    stripped_prop_type = re.sub(r'React\.PropTypes\.', '', stripped_prop_type)
+
+    if "oneOfType" in stripped_prop_type:
+      return stripped_prop_type
+    elif "instanceOf" in stripped_prop_type:
+      return stripped_prop_type
+    elif "oneOf" in stripped_prop_type:
+      return stripped_prop_type
+    elif "arrayOf" in stripped_prop_type:
+      return stripped_prop_type
+    elif "shape" in stripped_prop_type:
+      return stripped_prop_type
+    else:
+      return stripped_prop_type.capitalize()
+
+  def get_file_info(self, file):
+    component_info = {
+      "display_name": "Untitled Component",
+      "props": []
+    }
+
+    is_getting_prop_types = False
+
+    current_prop = None
+
+    for line in file:
+      # line contains displayName:
+      if "displayName" in line:
+        match_display_name = re.match('^[\s]{2}displayName\: [\"\'](.*)[\"\']\n$', line)
+        if match_display_name:
+          component_info["display_name"] = match_display_name.group(1)
+        else:
+          component_info["display_name"] = "Untitled Component"
+          continue
+
+
+      # line contains propTypes
+      if "propTypes:" in line:
+        is_getting_prop_types = True
+        continue
+
+      if is_getting_prop_types:
+        stripped_line = line.rstrip('\n')
+        if stripped_line.endswith("[") or stripped_line.endswith("("):
+          # the line ends with ( or [
+          prop_match = re.match("^[\s]{4}([a-z]*?)\: (.*?)[\(\[]{0,2}$", stripped_line)
+          if prop_match:
+            current_prop = {
+              "name": prop_match.group(1),
+              "type": self.clean_prop_type(prop_match.group(2)),
+              "sub_types": []
+            }
+
+        elif current_prop:
+          # partial prop type
+          word_only_line = re.sub(r'\W', '', self.clean_prop_type(stripped_line))
+
+          if word_only_line == "" or word_only_line == "isRequired":
+            if word_only_line == "isRequired":
+              current_prop["is_required"] = True
+
+            current_prop["type"] += "(" + ",".join(current_prop["sub_types"]) + ")"
+            del(current_prop["sub_types"])
+            component_info["props"].append(current_prop)
+            current_prop = None
+          else:
+            current_prop["sub_types"].append(self.clean_prop_type(stripped_line))
+
+        else:
+          # it's a one line thing
+          prop_match = re.match("^[\s]{4}([a-z]*?)\: (.*?)(\.isRequired)?$", stripped_line)
+          if prop_match:
+            is_required = False
+            if prop_match.group(3):
+              is_required = True
+
+            component_info["props"].append({
+              "name": prop_match.group(1),
+              "type": self.clean_prop_type(prop_match.group(2)),
+              "is_required": is_required
+            })
+
+      # line is empty
+      if is_getting_prop_types and line == "\n":
+        break
+
+    return component_info
+      # we're done here
 
   def preload_files(self, view):
     self.components = {}
@@ -76,84 +167,27 @@ class ReactAutocomplete(sublime_plugin.EventListener):
     for root, dirs, files in os.walk(component_folder, topdown=False):
       for name in files:
         with open(os.path.join(root, name), 'r', encoding='utf-8') as f:
-          file_content = f.read() 
-          display_name = self.find_display_name(file_content)
-          props = self.find_props(file_content)
+          component_info = self.get_file_info(f)
 
           suggestion = {
-            "title": "{} \t {}".format(display_name, name),
-            "suggestion": "" + display_name + "\n" + self.get_prop_string(props) + "/>"
+            "title": "{} \t {}".format(component_info["display_name"], name),
+            "suggestion": "" + component_info["display_name"] + "\n" + self.get_prop_string(component_info["props"]) + "/>"
           }
 
-          self.components[display_name] = {
+          self.components[component_info["display_name"]] = {
             "suggestion": suggestion,
-            "props": props,
-            "display_name": display_name,
+            "props": component_info["props"],
+            "display_name": component_info["display_name"],
             "path": os.path.join(root, name)
           }
 
-          self.component_names.append(display_name)
+          self.component_names.append(component_info["display_name"])
           self.component_names.sort()
 
     self.component_name_suggestions = [(self.components[name]["suggestion"]["title"], self.components[name]["suggestion"]["suggestion"]) for name in self.component_names]
 
   """
-  Find available propTypes for specified file
-  """
-  def find_props(self, contents):
-    # first find the line with propTypes
-    findPropTypes = re.search(re.compile('^[\s]{2}propTypes\:$', re.MULTILINE), contents)
-    if findPropTypes:
-      start = findPropTypes.start()
-    else:
-      # print("Couldn't find start, exiting")
-      return []
-    
-    # strip the contents before the line (we don't need them)
-    left_stripped_contents = contents[start:]
-
-    # find the first empty line
-    find_empty_lines = re.search(re.compile('^$', re.MULTILINE), left_stripped_contents)
-    if find_empty_lines:
-      end = find_empty_lines.start()
-    else:
-      # print("Couldn't find end, exiting")
-      return []
-
-    # strip everything after it
-    prop_type_string = left_stripped_contents[:end]
-
-    # and loop through the string to build a list of available props
-    pattern = re.compile("^[\s]{4}([a-z]*?)\: (.*?)(\.isRequired)?$", re.MULTILINE)
-    result = []
-    for (prop_name, prop_type, required) in re.findall(pattern, prop_type_string):
-      isRequired = False
-      if required:
-        isRequired = True
-
-      result.append({ "name": prop_name, "type": prop_type, "required": isRequired })
-
-    return result
-
-  """
-  Finds component's displayName
-  """
-  def find_display_name(self, contents):
-    match_display_name = re.search(re.compile('^[\s]{2}displayName\: [\"\'](.*)[\"\']$', re.MULTILINE), contents)
-    if match_display_name:
-      return match_display_name.group(1)
-    else:
-      return ""
-
-  def get_prop_string(self, props):
-    prop_string = ""
-    for prop in props:
-      # if prop["required"]:
-      prop_string = prop_string + "  " + prop["name"] + "={###" + prop["type"] + "###}\n"
-    return prop_string
-
-  """
-  Runs?
+  When 
   """
   def on_modified(self, view):
     if self.initial_autocomplete_point:

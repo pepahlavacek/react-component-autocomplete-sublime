@@ -12,8 +12,6 @@ Right now it only works for `cjsx` components in a very specific format.
 ## Installation
 Clone this repo into `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/ReactAutocomplete/`
 
-[Generate an access token](https://github.com/settings/tokens)
-
 Add file named `.react-autocomplete` to your project's root folder.
 The only contents of the file should be a path the component folder of the project (folder with components you'd like to autocomplete).
 
