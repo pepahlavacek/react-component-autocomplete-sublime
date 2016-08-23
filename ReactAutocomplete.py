@@ -163,6 +163,9 @@ class ReactAutocomplete(sublime_plugin.EventListener):
 
     for root, dirs, files in os.walk(component_folder, topdown=False):
       for name in files:
+        if not name.endswith("cjsx"):
+          continue
+
         with open(os.path.join(root, name), 'r', encoding='utf-8') as f:
           component_info = self.get_file_info(f)
 
@@ -220,11 +223,11 @@ class ReactAutocomplete(sublime_plugin.EventListener):
 
         start_of_component = view.find_by_class(start, False, sublime.CLASS_PUNCTUATION_END, "<")
         component_name = view.substr(view.word(start_of_component))
-        print(component_name)
+
         sugs = []
         if component_name in self.components:
           sugs = [("{} \t {} \t {}".format(prop["name"], prop["type"], prop["is_required"]), "{}={}".format(prop["name"], "{}")) for prop in self.components[component_name]["props"]]
-        
+
         return sugs
 
     else:
