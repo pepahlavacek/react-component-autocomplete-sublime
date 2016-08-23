@@ -12,10 +12,7 @@ MAX_WORD_SIZE = 50
 class AddRequireCommand(sublime_plugin.TextCommand):
   def run(self, edit, component):
     check_pattern = u"{} \= require".format(component["display_name"])
-    if self.view.find(check_pattern, 0):
-      # require is already present, we're done here
-      print("eh")
-    else:
+    if not self.view.find(check_pattern, 0):
       path = re.sub('\.cjsx$', '', component["path"])
       path = re.sub(".*?src\/scripts\/", "", path)
 
@@ -186,13 +183,19 @@ class ReactAutocomplete(sublime_plugin.EventListener):
 
     self.component_name_suggestions = [(self.components[name]["suggestion"]["title"], self.components[name]["suggestion"]["suggestion"]) for name in self.component_names]
 
+  def get_prop_string(self, props):
+    prop_string = ""
+    for prop in props:
+      # if prop["required"]:
+      prop_string = prop_string + "  " + prop["name"] + "={###" + prop["type"] + "###}\n"
+    return prop_string
+
   """
-  When 
+  Runs when the file is modified
   """
   def on_modified(self, view):
     if self.initial_autocomplete_point:
       component_name = (view.substr(view.word(self.initial_autocomplete_point)))
-      print(component_name)
       if component_name in self.components:
         view.run_command("add_require", {"component": self.components[component_name]})
         self.initial_autocomplete_point = None
@@ -212,11 +215,17 @@ class ReactAutocomplete(sublime_plugin.EventListener):
       if is_start_of_component:
         return self.component_name_suggestions
       else:
-        # we want to get list of available props
-        # file = self.load_url(CONTENTS_URL.format(items["GuideDashboard"], ACCESS_TOKEN))
-        # props = self.find_props(base64.b64decode(file['content']).decode('utf-8'))
-        # sugs = [("{} \t {} \t {}".format(prop["name"], prop["type"], prop["required"]), "{}=''".format(prop["name"]) ) for prop in props]
-        # return sugs
-        return []
+        # we want to get list of available props for current component
+        start = locations[0] - len(prefix)
+
+        start_of_component = view.find_by_class(start, False, sublime.CLASS_PUNCTUATION_END, "<")
+        component_name = view.substr(view.word(start_of_component))
+        print(component_name)
+        sugs = []
+        if component_name in self.components:
+          sugs = [("{} \t {} \t {}".format(prop["name"], prop["type"], prop["is_required"]), "{}={}".format(prop["name"], "{}")) for prop in self.components[component_name]["props"]]
+        
+        return sugs
+
     else:
       return []
