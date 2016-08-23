@@ -54,7 +54,7 @@ class ReactAutocomplete(sublime_plugin.EventListener):
   def get_component_folder(self, settings_file):
     with open(settings_file, 'r', encoding="utf-8") as f:
       settings_file_contents = f.read()
-      component_folder = os.path.join(os.path.dirname(settings_file), settings_file_contents)
+      component_folder = os.path.join(os.path.dirname(settings_file), settings_file_contents.rstrip("\n"))
 
       return component_folder
 

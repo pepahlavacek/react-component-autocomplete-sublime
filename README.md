@@ -10,7 +10,9 @@ Once you select a component, it also automatically appends a `require` statement
 Right now it only works for `cjsx` components.
 
 ## Installation
-Clone this repo into `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/ReactAutocomplete/`
+
+Clone this repo in your `Packages` folder:
+`git clone git@github.com:pepahlavacek/sublime-react-component-autocomplete.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/ReactAutocomplete/`
 
 Add file named `.react-autocomplete` to your project's root folder.
 ```
