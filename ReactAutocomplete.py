@@ -108,8 +108,10 @@ class ReactAutocomplete(sublime_plugin.EventListener):
   def get_prop_string(self, props):
     prop_string = ""
     for prop in props:
-      # if prop["required"]:
-      prop_string = prop_string + "  " + prop["name"] + "={###" + prop["type"] + "###}\n"
+      if SETTINGS["output_format"] == "cjsx":
+        prop_string = prop_string + "  " + prop["name"] + "={###" + prop["type"] + "###}\n"
+      else:
+        prop_string = prop_string + "  " + prop["name"] + "={/*" + prop["type"] + "*/}\n"
     return prop_string
 
   """
