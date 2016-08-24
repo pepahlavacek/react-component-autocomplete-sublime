@@ -25,3 +25,6 @@ It should only contain a path to the component folder (folder containing compone
 ## To Do
 - [ ] Use relative path in `require` statements
 - [ ] Replace any file extension in `require` statements, not just `cjsx`
+- [x] Parse jsx and js components
+- [ ] Allow specifying file (output) format in settings
+- [ ] Clean up and deduplicate tests, make imports work there

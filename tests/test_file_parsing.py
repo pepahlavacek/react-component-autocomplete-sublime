@@ -2,7 +2,7 @@ import unittest
 import os
 import re
 
-STUB_PATH = "/Users/pepahlavacek/Library/Application Support/Sublime Text 3/Packages/ReactAutocomplete/tests/stubs/"
+STUB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stubs")
 
 def clean_prop_type(prop_type):
   stripped_prop_type = re.sub(r"[\s]*", '', prop_type)
@@ -104,7 +104,6 @@ def get_file_info(file):
       break
 
   return component_info
-    # we're done here
 
 
 class TestFileParsing(unittest.TestCase):
@@ -173,6 +172,10 @@ class TestFileParsing(unittest.TestCase):
         component_info = get_file_info(f)
         self.assertEqual(component_info["display_name"], "NavActivityFeedToggle")
 
+
+# if __name__ == '__main__' and __package__ is None:
+#   from os import sys, path
+#   sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 if __name__ == '__main__':
   unittest.main()
