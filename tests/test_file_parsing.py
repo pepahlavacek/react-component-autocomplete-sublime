@@ -107,6 +107,8 @@ def get_file_info(file):
 
 
 class TestFileParsing(unittest.TestCase):
+
+    # test jsx parsing
     def test_jsx(self):
       with open(os.path.join(STUB_PATH, "stub-jsx.jsx"), 'r') as f:
         component_info = get_file_info(f)
@@ -136,6 +138,17 @@ class TestFileParsing(unittest.TestCase):
         self.assertEqual(component_info["props"][1]["name"], "onChange")
         self.assertEqual(component_info["props"][1]["type"], "Func")
         self.assertEqual(component_info["props"][1]["is_required"], False)
+
+    # display_name_with_double_quotes
+    # display_name_with_single_quotes
+    # display_name_with_comma
+    # var_name_to_display_name
+    # const_name_to_display_name
+    # let_name_to_displayName
+    # exports_name_createClass
+
+    # stops_getting_prop_types_on_new_line
+    # stops_getting_prop_types_on_different_key
 
     def test_cjsx(self):
       with open(os.path.join(STUB_PATH, "stub-cjsx.cjsx"), 'r') as f:

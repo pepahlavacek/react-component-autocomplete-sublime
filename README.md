@@ -26,6 +26,7 @@ It should only contain a path to the component folder (folder containing compone
 - [ ] Use relative path in `require` statements
 - [ ] Replace any file extension in `require` statements, not just `cjsx`
 - [x] Parse jsx and js components
-- [ ] Allow specifying file (output) format in settings file
+- [x] ~~Allow specifying file (output) format in settings file~~ Use file syntax based on settings
 - [ ] Clean up and deduplicate tests, make imports work there
-- [ ] Take indentation settings in consideration (2 vs 4 spaces)
+- [x] Take indentation settings in consideration (2 vs 4 spaces)
+- [ ] Allow underscore in propTypes

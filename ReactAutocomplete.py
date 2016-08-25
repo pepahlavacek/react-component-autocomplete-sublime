@@ -8,8 +8,20 @@ MAX_WORD_SIZE = 50
 
 SETTINGS = {
   "file_extensions": [".cjsx", ".jsx", ".js"],
-  "output_format": "cjsx" # cjsx, jsx
 }
+
+def get_syntax(view_syntax):
+  syntax_match = re.match(r"^(.*)\/([A-Z]*)\.tmLanguage$", view_syntax)
+
+  syntax = "JSX"
+  if syntax_match:
+    syntax = syntax_match.group(2)
+    if not syntax in ["JSX", "CJSX"]:
+      syntax = "JSX"
+  else:
+    syntax = "JSX"
+
+  return syntax
 
 def clean_prop_type(prop_type):
   stripped_prop_type = re.sub(r"[\s]*", '', prop_type)
@@ -116,11 +128,13 @@ def get_file_info(file):
 class AddRequireCommand(sublime_plugin.TextCommand):
   def run(self, edit, component):
     check_pattern = u"{} \= require".format(component["display_name"])
+    syntax = get_syntax(self.view.settings().get('syntax'))
+
     if not self.view.find(check_pattern, 0):
       path = re.sub('\.cjsx$', '', component["path"])
       path = re.sub(".*?src\/scripts\/", "", path)
 
-      if SETTINGS["output_format"] == "cjsx":
+      if syntax == "CJSX":
         require_text = "\n{} = require '{}'\n".format(component["display_name"], path)
       else:
         require_text = "\n{} = require('{}');\n".format(component["display_name"], path)
@@ -170,6 +184,11 @@ class ReactAutocomplete(sublime_plugin.EventListener):
     self.components = {}
     self.component_names = []
     self.component_name_suggestions = []
+    print(view.settings().get('syntax'))
+
+    syntax = get_syntax(view.settings().get('syntax'))
+
+    tab_size = view.settings().get('tab_size')
 
     settings_file = self.find_settings_file(view)
 
@@ -189,7 +208,7 @@ class ReactAutocomplete(sublime_plugin.EventListener):
 
           suggestion = {
             "title": "{} \t {}".format(component_info["display_name"], name),
-            "suggestion": "" + component_info["display_name"] + "\n" + self.get_prop_string(component_info["props"]) + "/>"
+            "suggestion": "" + component_info["display_name"] + "\n" + self.get_prop_string(component_info["props"], tab_size, syntax) + "/>"
           }
 
           self.components[component_info["display_name"]] = {
@@ -204,13 +223,15 @@ class ReactAutocomplete(sublime_plugin.EventListener):
 
     self.component_name_suggestions = [(self.components[name]["suggestion"]["title"], self.components[name]["suggestion"]["suggestion"]) for name in self.component_names]
 
-  def get_prop_string(self, props):
+  def get_prop_string(self, props, tab_size, syntax):
     prop_string = ""
+    indent = " " * tab_size
+
     for prop in props:
-      if SETTINGS["output_format"] == "cjsx":
-        prop_string = prop_string + "  " + prop["name"] + "={###" + prop["type"] + "###}\n"
+      if syntax == "CJSX":
+        prop_string = prop_string + indent + prop["name"] + "={###" + prop["type"] + "###}\n"
       else:
-        prop_string = prop_string + "  " + prop["name"] + "={/*" + prop["type"] + "*/}\n"
+        prop_string = prop_string + indent + prop["name"] + "={/*" + prop["type"] + "*/}\n"
     return prop_string
 
   """
@@ -230,7 +251,7 @@ class ReactAutocomplete(sublime_plugin.EventListener):
     self.preload_files(view)
     self.initial_autocomplete_point = None
 
-    if view.match_selector(locations[0], "jsx.tag-area.coffee"):
+    if view.match_selector(locations[0], "jsx.tag-area.coffee") or view.match_selector(locations[0], "source.js"):
       self.initial_autocomplete_point = locations[0] - len(prefix)
       cursor_start = locations[0] - len(prefix) - 1
       is_start_of_component = view.substr(sublime.Region(cursor_start, cursor_start + 1)) == "<"
