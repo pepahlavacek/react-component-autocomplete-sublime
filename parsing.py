@@ -59,6 +59,7 @@ def get_file_info(file):
       stripped_line = line.rstrip('\n')
       if stripped_line.endswith("[") or stripped_line.endswith("("):
         # the line ends with ( or [
+        # it's probably a multiline prop definition (arrayOf, oneOf, oneOfType, something like that)
         prop_match = re.match("^[\s]*([a-zA-Z_]*?)\:[\s]*(.*?)[\(\[]{0,2}$", stripped_line)
         if prop_match:
           current_prop = {
@@ -84,7 +85,7 @@ def get_file_info(file):
 
       else:
         # it's a one line thing
-        prop_match = re.match("^[\s]*([a-zA-Z]*?)\:[\s]*(.*?)(\.isRequired)?[\,]?$", stripped_line)
+        prop_match = re.match("^[\s]*([a-zA-Z_]*?)\:[\s]*(.+?)(\.isRequired)?[\,]?$", stripped_line)
         if prop_match:
           is_required = False
           if prop_match.group(3):
@@ -95,9 +96,31 @@ def get_file_info(file):
             "type": clean_prop_type(prop_match.group(2)),
             "is_required": is_required
           })
+        else:
+          is_getting_prop_types = False
+          break
 
     # line is empty
     if is_getting_prop_types and line == "\n":
+      is_getting_prop_types = False
+      break
+
+    # line is a closing curly bracket
+    if is_getting_prop_types and "}" in line:
+      is_getting_prop_types = False
       break
 
   return component_info
+
+def get_syntax(view_syntax):
+  syntax_match = re.match(r"^(.*)\/([A-Z]*)\.tmLanguage$", view_syntax)
+
+  syntax = "JSX"
+  if syntax_match:
+    syntax = syntax_match.group(2)
+    if not syntax in ["JSX", "CJSX"]:
+      syntax = "JSX"
+  else:
+    syntax = "JSX"
+
+  return syntax

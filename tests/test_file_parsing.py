@@ -1,9 +1,14 @@
 import unittest
 import os
 import re
-from some_methods import *
+from ReactAutocomplete.parsing import *
 
-STUB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tests/stubs")
+import sublime
+import sys
+
+version = sublime.version()
+
+STUB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stubs")
 
 class TestFileParsing(unittest.TestCase):
 

@@ -11,7 +11,7 @@ module.exports = React.createClass({
         twoProps: React.PropTypes.string,
     },
 
-    threeProps: React.PropTypes.string,
+    threePropsWrong: React.PropTypes.string,
 
     componentDidMount: function() {
         var _this = this;

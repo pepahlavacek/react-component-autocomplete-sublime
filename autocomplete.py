@@ -2,7 +2,7 @@ import sublime, sublime_plugin
 
 import re
 import os
-from some_methods import *
+from ReactAutocomplete.parsing import *
 
 MIN_WORD_SIZE = 4
 MAX_WORD_SIZE = 50
@@ -10,44 +10,6 @@ MAX_WORD_SIZE = 50
 SETTINGS = {
   "file_extensions": [".cjsx", ".jsx", ".js"],
 }
-
-def get_syntax(view_syntax):
-  syntax_match = re.match(r"^(.*)\/([A-Z]*)\.tmLanguage$", view_syntax)
-
-  syntax = "JSX"
-  if syntax_match:
-    syntax = syntax_match.group(2)
-    if not syntax in ["JSX", "CJSX"]:
-      syntax = "JSX"
-  else:
-    syntax = "JSX"
-
-  return syntax
-
-
-class AddRequireCommand(sublime_plugin.TextCommand):
-  def run(self, edit, component):
-    check_pattern = u"{} \= require".format(component["display_name"])
-    syntax = get_syntax(self.view.settings().get('syntax'))
-
-    if not self.view.find(check_pattern, 0):
-      # path = re.sub('\.cjsx$', '', component["path"])
-      # path = re.sub(".*?src\/scripts\/", "", path)
-      relative_path = os.path.relpath(component["path"], os.path.dirname(self.view.file_name()))
-      relative_path = os.path.splitext(relative_path)[0]
-
-      if syntax == "CJSX":
-        require_text = "\n{} = require '{}'\n".format(component["display_name"], relative_path)
-      else:
-        require_text = "\n{} = require('{}');\n".format(component["display_name"], relative_path)
-
-      all_requires = self.view.find_all("[a-zA-Z]* \= require", 0)
-      if all_requires:
-        insert_at = self.view.line(all_requires[-1]).end()
-      else:
-        insert_at = self.view.line(0).end()
-
-      self.view.insert(edit, insert_at, require_text)
 
 class ReactAutocomplete(sublime_plugin.EventListener):
   """
