@@ -23,10 +23,11 @@ src/scripts/components
 It should only contain a path to the component folder (folder containing components you'd like to autocomplete).
 
 ## To Do
-- [ ] Use relative path in `require` statements
-- [ ] Replace any file extension in `require` statements, not just `cjsx`
+- [x] Use relative path in `require` statements
+- [x] Replace any file extension in `require` statements, not just `cjsx`
 - [x] Parse jsx and js components
 - [x] ~~Allow specifying file (output) format in settings file~~ Use file syntax based on settings
 - [ ] Clean up and deduplicate tests, make imports work there
 - [x] Take indentation settings in consideration (2 vs 4 spaces)
-- [ ] Allow underscore in propTypes
+- [x] Allow underscore in propTypes
+- [ ] Add more tests

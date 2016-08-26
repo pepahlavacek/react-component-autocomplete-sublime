@@ -81,7 +81,7 @@ def get_file_info(file):
       stripped_line = line.rstrip('\n')
       if stripped_line.endswith("[") or stripped_line.endswith("("):
         # the line ends with ( or [
-        prop_match = re.match("^[\s]*([a-zA-Z]*?)\:[\s]*(.*?)[\(\[]{0,2}$", stripped_line)
+        prop_match = re.match("^[\s]*([a-zA-Z_]*?)\:[\s]*(.*?)[\(\[]{0,2}$", stripped_line)
         if prop_match:
           current_prop = {
             "name": prop_match.group(1),
@@ -131,13 +131,15 @@ class AddRequireCommand(sublime_plugin.TextCommand):
     syntax = get_syntax(self.view.settings().get('syntax'))
 
     if not self.view.find(check_pattern, 0):
-      path = re.sub('\.cjsx$', '', component["path"])
-      path = re.sub(".*?src\/scripts\/", "", path)
+      # path = re.sub('\.cjsx$', '', component["path"])
+      # path = re.sub(".*?src\/scripts\/", "", path)
+      relative_path = os.path.relpath(component["path"], os.path.dirname(self.view.file_name()))
+      relative_path = os.path.splitext(relative_path)[0]
 
       if syntax == "CJSX":
-        require_text = "\n{} = require '{}'\n".format(component["display_name"], path)
+        require_text = "\n{} = require '{}'\n".format(component["display_name"], relative_path)
       else:
-        require_text = "\n{} = require('{}');\n".format(component["display_name"], path)
+        require_text = "\n{} = require('{}');\n".format(component["display_name"], relative_path)
 
       all_requires = self.view.find_all("[a-zA-Z]* \= require", 0)
       if all_requires:
@@ -184,7 +186,6 @@ class ReactAutocomplete(sublime_plugin.EventListener):
     self.components = {}
     self.component_names = []
     self.component_name_suggestions = []
-    print(view.settings().get('syntax'))
 
     syntax = get_syntax(view.settings().get('syntax'))
 

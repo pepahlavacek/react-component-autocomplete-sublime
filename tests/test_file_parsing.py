@@ -150,6 +150,9 @@ class TestFileParsing(unittest.TestCase):
     # stops_getting_prop_types_on_new_line
     # stops_getting_prop_types_on_different_key
 
+    # parses camelCaseProp
+    # parses snake_case_prop
+
     def test_cjsx(self):
       with open(os.path.join(STUB_PATH, "stub-cjsx.cjsx"), 'r') as f:
         component_info = get_file_info(f)
