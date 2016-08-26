@@ -1,5 +1,3 @@
-// https://github.com/ezequiel/react-typeahead-component/blob/master/dist/react-typeahead-component.dev.js
-
 module.exports = React.createClass({
     displayName: 'Input Field',
 

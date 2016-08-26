@@ -9,7 +9,7 @@ LocalSettingsStore = require 'stores/local-settings-store'
 
 transitionToCurrentRoute = require 'utils/transition-to-current-route'
 
-NavActivityFeedToggle = React.createClass
+module.exports = NavActivityFeedToggle = React.createClass
 
   contextTypes:
     location: React.PropTypes.object
@@ -24,5 +24,3 @@ NavActivityFeedToggle = React.createClass
     lastClosedAt: React.PropTypes.number
     hasNewNotifications: React.PropTypes.bool
     showPipe: React.PropTypes.bool
-
-module.exports = NavActivityFeedToggle
