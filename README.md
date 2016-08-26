@@ -27,7 +27,13 @@ It should only contain a path to the component folder (folder containing compone
 - [x] Replace any file extension in `require` statements, not just `cjsx`
 - [x] Parse jsx and js components
 - [x] ~~Allow specifying file (output) format in settings file~~ Use file syntax based on settings
-- [ ] Clean up and deduplicate tests, make imports work there
+- [x] Clean up and deduplicate tests, make imports work there
 - [x] Take indentation settings in consideration (2 vs 4 spaces)
 - [x] Allow underscore in propTypes
-- [ ] Add more tests
+- [x] Add more tests
+- [ ] Output nicer default props than commented prop types
+- [ ] Parse instanceOf, arrayOf, oneOf, oneOfType with at least some confidence (add tests)
+- [ ] Ignore comments on prop lines
+- [ ] Parse ImmutablePropTypes (or any custom ones) as they come (don't mess up the names)
+- [ ] Start versioning
+- [ ] Get it ready for packa control
