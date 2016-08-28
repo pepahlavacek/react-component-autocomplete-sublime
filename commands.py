@@ -1,4 +1,8 @@
+import sublime, sublime_plugin
 import os
+
+from ReactAutocomplete.parsing import *
+
 
 class AddRequireCommand(sublime_plugin.TextCommand):
   def run(self, edit, component):
