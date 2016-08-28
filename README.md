@@ -36,4 +36,7 @@ It should only contain a path to the component folder (folder containing compone
 - [x] Ignore comments on prop lines
 - [x] Parse ImmutablePropTypes (or any custom ones) as they come (don't mess up the names)
 - [ ] Start versioning
+- [ ] Add gifs with usage
+- [ ] Write docs
+- [ ] Add contribution section
 - [ ] Get it ready for package control
