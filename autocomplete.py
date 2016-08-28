@@ -119,6 +119,7 @@ class ReactAutocomplete(sublime_plugin.EventListener):
         component_name = view.substr(view.word(start_of_component))
 
         sugs = []
+        print(len(self.components))
         if component_name in self.components:
           sugs = [("{} \t {} \t {}".format(prop["name"], prop["type"], prop["is_required"]), "{}={}".format(prop["name"], "{}")) for prop in self.components[component_name]["props"]]
 

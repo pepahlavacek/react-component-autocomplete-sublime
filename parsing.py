@@ -4,7 +4,6 @@ import os
 def clean_prop_type(prop_type):
   stripped_prop_type = re.sub(r"[\s]*", '', prop_type)
   stripped_prop_type = re.sub(r'React\.PropTypes\.', '', stripped_prop_type)
-
   # if "oneOfType" in stripped_prop_type:
   #   return stripped_prop_type
   # elif "oneOf" in stripped_prop_type:
@@ -65,6 +64,7 @@ def get_display_name(line):
   return "UntitledComponent"
 
 def get_file_info(file):
+
   component_info = {
     "display_name": "UntitledComponent",
     "props": []
@@ -77,6 +77,10 @@ def get_file_info(file):
 
   for non_stripped_line in file:
     line = non_stripped_line.rstrip('\n')
+    line = re.sub(r"\#.*$", "", non_stripped_line)
+    line = re.sub(r"\/\/.*$", "", line)
+    line = line.rstrip()
+
     current_indent = len(line) - len(line.lstrip())
 
     if should_skip_line(line):
@@ -122,6 +126,7 @@ def get_file_info(file):
         current_prop = {
           "name": multiline_prop_match.group(1),
           "type": clean_prop_type(multiline_prop_match.group(2)),
+          "is_required": False,
           "sub_types": []
         }
       elif single_line_prop_match:
@@ -132,13 +137,15 @@ def get_file_info(file):
         current_prop = {
           "name": single_line_prop_match.group(1),
           "type": clean_prop_type(single_line_prop_match.group(2)),
-          "is_required": is_required
+          "is_required": is_required,
+          "sub_types": []
         }
       elif general_prop_match:
         current_prop = {
           "name": general_prop_match.group(1),
           "type": "custom",
-          "is_required": False
+          "is_required": False,
+          "sub_types": []
         }
 
     elif current_indent / 2 > prop_types_initial_indent:
@@ -155,10 +162,11 @@ def get_file_info(file):
       if current_prop:
         component_info["props"].append(current_prop)
         current_prop = None
-    # else:
-    #   print("else", line)
-    # current_prop["type"] += "(" + ",".join(current_prop["sub_types"]) + ")"
-    # if not current_prop and re.match("^[\s]*([a-zA-Z_]*?)\:", line):
+
+  # for prop in component_info["props"]:
+  #   if "sub_types" in prop:
+  #     prop["type"] += "(" + ",".join(prop["sub_types"]) + ")"
+  #     del(prop["sub_types"])
 
   return component_info
 

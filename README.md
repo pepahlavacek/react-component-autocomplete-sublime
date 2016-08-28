@@ -31,9 +31,9 @@ It should only contain a path to the component folder (folder containing compone
 - [x] Take indentation settings in consideration (2 vs 4 spaces)
 - [x] Allow underscore in propTypes
 - [x] Add more tests
-- [ ] Output nicer default props than commented prop types
-- [ ] Parse instanceOf, arrayOf, oneOf, oneOfType with at least some confidence (add tests)
-- [ ] Ignore comments on prop lines
-- [ ] Parse ImmutablePropTypes (or any custom ones) as they come (don't mess up the names)
+- [x] Output nicer default props than commented prop types
+- [x] Parse instanceOf, arrayOf, oneOf, oneOfType with at least some confidence (add tests)
+- [x] Ignore comments on prop lines
+- [x] Parse ImmutablePropTypes (or any custom ones) as they come (don't mess up the names)
 - [ ] Start versioning
-- [ ] Get it ready for packa control
+- [ ] Get it ready for package control
