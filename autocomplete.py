@@ -3,6 +3,7 @@ import sublime, sublime_plugin
 import re
 import os
 from ReactAutocomplete.parsing import *
+from ReactAutocomplete.output import *
 
 MIN_WORD_SIZE = 4
 MAX_WORD_SIZE = 50
@@ -71,7 +72,7 @@ class ReactAutocomplete(sublime_plugin.EventListener):
 
           suggestion = {
             "title": "{} \t {}".format(component_info["display_name"], name),
-            "suggestion": "" + component_info["display_name"] + "\n" + self.get_prop_string(component_info["props"], tab_size, syntax) + "/>"
+            "suggestion": "" + component_info["display_name"] + "\n" + get_prop_string(component_info["props"], tab_size, syntax) + "/>"
           }
 
           self.components[component_info["display_name"]] = {
@@ -85,17 +86,6 @@ class ReactAutocomplete(sublime_plugin.EventListener):
           self.component_names.sort()
 
     self.component_name_suggestions = [(self.components[name]["suggestion"]["title"], self.components[name]["suggestion"]["suggestion"]) for name in self.component_names]
-
-  def get_prop_string(self, props, tab_size, syntax):
-    prop_string = ""
-    indent = " " * tab_size
-
-    for prop in props:
-      if syntax == "CJSX":
-        prop_string = prop_string + indent + prop["name"] + "={###" + prop["type"] + "###}\n"
-      else:
-        prop_string = prop_string + indent + prop["name"] + "={/*" + prop["type"] + "*/}\n"
-    return prop_string
 
   """
   Runs when the file is modified

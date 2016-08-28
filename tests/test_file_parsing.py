@@ -6,6 +6,7 @@ from ReactAutocomplete.parsing import *
 import sublime
 import sys
 
+
 version = sublime.version()
 
 STUB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stubs")
@@ -18,7 +19,7 @@ class TestFileParsing(unittest.TestCase):
         component_info = get_file_info(f)
         self.assertEqual(component_info["display_name"], "AriaStatus")
         self.assertEqual(component_info["props"][0]["name"], "message")
-        self.assertEqual(component_info["props"][0]["type"], "String")
+        self.assertEqual(component_info["props"][0]["type"], "string")
         self.assertEqual(component_info["props"][0]["is_required"], False)
 
     def test_jsx_two(self):
@@ -26,10 +27,10 @@ class TestFileParsing(unittest.TestCase):
         component_info = get_file_info(f)
         self.assertEqual(component_info["display_name"], "CheckboxGroup")
         self.assertEqual(component_info["props"][0]["name"], "name")
-        self.assertEqual(component_info["props"][0]["type"], "String")
+        self.assertEqual(component_info["props"][0]["type"], "string")
         self.assertEqual(component_info["props"][0]["is_required"], True)
         self.assertEqual(component_info["props"][1]["name"], "options")
-        self.assertEqual(component_info["props"][1]["type"], "Array")
+        self.assertEqual(component_info["props"][1]["type"], "array")
         self.assertEqual(component_info["props"][1]["is_required"], True)
 
     def test_js(self):
@@ -37,10 +38,10 @@ class TestFileParsing(unittest.TestCase):
         component_info = get_file_info(f)
         self.assertEqual(component_info["display_name"], "InputField")
         self.assertEqual(component_info["props"][0]["name"], "value")
-        self.assertEqual(component_info["props"][0]["type"], "String")
+        self.assertEqual(component_info["props"][0]["type"], "string")
         self.assertEqual(component_info["props"][0]["is_required"], False)
         self.assertEqual(component_info["props"][1]["name"], "onChange")
-        self.assertEqual(component_info["props"][1]["type"], "Func")
+        self.assertEqual(component_info["props"][1]["type"], "func")
         self.assertEqual(component_info["props"][1]["is_required"], False)
 
     def test_display_name_with_double_quotes(self):
@@ -93,10 +94,10 @@ class TestFileParsing(unittest.TestCase):
         self.assertEqual(component_info["display_name"], "AriaStatus")
 
         self.assertEqual(component_info["props"][0]["name"], "oneProp")
-        self.assertEqual(component_info["props"][0]["type"], "String")
+        self.assertEqual(component_info["props"][0]["type"], "string")
         self.assertEqual(component_info["props"][0]["is_required"], False)
         self.assertEqual(component_info["props"][1]["name"], "twoProps")
-        self.assertEqual(component_info["props"][1]["type"], "String")
+        self.assertEqual(component_info["props"][1]["type"], "string")
         self.assertEqual(component_info["props"][1]["is_required"], False)
 
         self.assertEqual(len(component_info["props"]), 2)
@@ -141,29 +142,36 @@ class TestFileParsing(unittest.TestCase):
         self.assertEqual(component_info["display_name"], "NavActivityFeedToggle")
 
         self.assertEqual(component_info["props"][0]["name"], "isOpen")
-        self.assertEqual(component_info["props"][0]["type"], "Bool")
+        self.assertEqual(component_info["props"][0]["type"], "bool")
         self.assertEqual(component_info["props"][0]["is_required"], False)
 
         self.assertEqual(component_info["props"][1]["name"], "lastOpenedAt")
-        self.assertEqual(component_info["props"][1]["type"], "Number")
+        self.assertEqual(component_info["props"][1]["type"], "number")
         self.assertEqual(component_info["props"][1]["is_required"], True)
 
         self.assertEqual(component_info["props"][2]["name"], "lastClosedAt")
-        self.assertEqual(component_info["props"][2]["type"], "Number")
+        self.assertEqual(component_info["props"][2]["type"], "number")
         self.assertEqual(component_info["props"][2]["is_required"], False)
 
         self.assertEqual(component_info["props"][3]["name"], "hasNewNotifications")
-        self.assertEqual(component_info["props"][3]["type"], "Bool")
+        self.assertEqual(component_info["props"][3]["type"], "bool")
         self.assertEqual(component_info["props"][3]["is_required"], True)
 
         self.assertEqual(component_info["props"][4]["name"], "showPipe")
-        self.assertEqual(component_info["props"][4]["type"], "Bool")
+        self.assertEqual(component_info["props"][4]["type"], "bool")
         self.assertEqual(component_info["props"][4]["is_required"], False)
 
     def test_cjsx2(self):
       with open(os.path.join(STUB_PATH, "stub-cjsx2.cjsx"), 'r') as f:
         component_info = get_file_info(f)
         self.assertEqual(component_info["display_name"], "NavActivityFeedToggle")
+
+    def test_parses_jsx_prop_types(self):
+      with open(os.path.join(STUB_PATH, "parse_prop_types.jsx"), 'r') as f:
+        component_info = get_file_info(f)
+
+        self.assertEqual(component_info["display_name"], "MyComponent")
+        self.assertEqual(len(component_info["props"]), 19)
 
 if __name__ == '__main__':
   unittest.main()
