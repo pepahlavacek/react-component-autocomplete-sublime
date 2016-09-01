@@ -16,7 +16,7 @@ You can clone this repository to the Packages directory of your Sublime installa
 
 ```
 cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/
-git clone git@github.com:pepahlavacek/react-component-autocomplete-sublime.git
+git clone git@github.com:pepahlavacek/react-component-autocomplete-sublime.git ReactComponentAutocomplete
 ```
 
 ### Setting up your project
