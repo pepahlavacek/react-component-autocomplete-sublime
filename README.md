@@ -39,6 +39,13 @@ Or you can just add the file manually.
 src/scripts/components
 ```
 
+## Usage
+
+![animation of existing component autocompletion](gif/demo-existing.gif)
+
+![animation of new prop autocompletion](gif/demo-newprop.gif)
+
+
 ## Contributing
 This plugin is work in progress and any help is appreciated. Feel free to add an issue if you find a bug, or just fork and open a new PR with a fix or an improvement.
 
