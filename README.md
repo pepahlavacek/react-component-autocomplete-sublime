@@ -14,7 +14,7 @@ Coming soon.
 ### Manual Installation
 You can clone this repository to the Packages directory of your Sublime installation. In Mac OS Terminal, run:
 
-`cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/ReactAutocomplete/`
+`cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/`
 `git clone git@github.com:pepahlavacek/react-component-autocomplete-sublime.git`
 
 ### Setting up your project
