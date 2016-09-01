@@ -69,8 +69,9 @@ def match_one_of_style(pattern_name, translate, prop_type, sub_types, syntax):
 def get_object_from_shape(sub_types, syntax):
   output_list = []
   for sub_type in sub_types:
-    [key, value] = sub_type.split(":")
-    output_list.append("{}: {}".format(key, get_translated_value(value, syntax)))
+    if len(sub_type.split(":")) > 1:
+      [key, value] = sub_type.split(":")
+      output_list.append("{}: {}".format(key, get_translated_value(value, syntax)))
 
   return "{" + ", ".join(output_list) + "}"
 
