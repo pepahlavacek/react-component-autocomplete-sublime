@@ -4,19 +4,6 @@ import os
 def clean_prop_type(prop_type):
   stripped_prop_type = re.sub(r"[\s]*", '', prop_type)
   stripped_prop_type = re.sub(r'React\.PropTypes\.', '', stripped_prop_type)
-  # if "oneOfType" in stripped_prop_type:
-  #   return stripped_prop_type
-  # elif "oneOf" in stripped_prop_type:
-  #   return stripped_prop_type
-  # elif "instanceOf" in stripped_prop_type:
-  #   return stripped_prop_type
-  # elif "oneOf" in stripped_prop_type:
-  #   return stripped_prop_type
-  # elif "arrayOf" in stripped_prop_type:
-  #   return stripped_prop_type
-  # elif "shape" in stripped_prop_type:
-  #   return stripped_prop_type
-  # else:
   return stripped_prop_type
 
 def should_skip_line(line):
@@ -40,6 +27,9 @@ def should_get_display_name(line):
   if "displayName" in line:
     return True
 
+  if "extends Component" in line:
+    return True
+
   return False
 
 def get_display_name(line):
@@ -52,15 +42,20 @@ def get_display_name(line):
         return re.sub(r'\s', '', match_variable_name.group(2))
 
     else:
-      match_variable_name = re.match('^[\s]*(var|const|let)?(.*?)\= React\.createClass(.*)$', line)
+      match_variable_name = re.match('^\s*(var|const|let|export)\s*(var|const|class|default)?\s*(.*?)\s*\= React\.createClass(.*)$', line)
       if match_variable_name:
-        return re.sub(r'\s', '', match_variable_name.group(2))
+        return re.sub(r'\s', '', match_variable_name.group(3))
 
   if "displayName" in line:
     match_display_name = re.match('^[\s]*displayName\:[\s]*[\"\'](.*)[\"\'](.*)$', line)
     if match_display_name:
       return re.sub(r'\s', '', match_display_name.group(1))
 
+  if "extends Component" in line:
+    match_class_name = re.match(".*class\s*([a-zA-Z]*)\s*extends Component.*$", line) 
+    if match_class_name:
+      return re.sub(r'\s', '', match_class_name.group(1))
+  
   return "UntitledComponent"
 
 def get_file_info(file):

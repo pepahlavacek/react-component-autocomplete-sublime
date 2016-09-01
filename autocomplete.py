@@ -2,17 +2,14 @@ import sublime, sublime_plugin
 
 import re
 import os
-from ReactAutocomplete.parsing import *
-from ReactAutocomplete.output import *
-
-MIN_WORD_SIZE = 4
-MAX_WORD_SIZE = 50
+from ReactComponentAutocomplete.parsing import *
+from ReactComponentAutocomplete.output import *
 
 SETTINGS = {
   "file_extensions": [".cjsx", ".jsx", ".js"],
 }
 
-class ReactAutocomplete(sublime_plugin.EventListener):
+class ReactComponentAutocomplete(sublime_plugin.EventListener):
   """
   Provide component name completions for Builder
   """
@@ -121,7 +118,12 @@ class ReactAutocomplete(sublime_plugin.EventListener):
         sugs = []
         print(len(self.components))
         if component_name in self.components:
-          sugs = [("{} \t {} \t {}".format(prop["name"], prop["type"], prop["is_required"]), "{}={}".format(prop["name"], "{}")) for prop in self.components[component_name]["props"]]
+          required_text = ""
+          sugs = []
+          for prop in self.components[component_name]["props"]:
+            if prop["is_required"]:
+              required_text = "required"
+            sugs.append(("{} \t {} \t {}".format(prop["name"], prop["type"], required_text), "{}={}".format(prop["name"], "{}")))
 
         return sugs
 

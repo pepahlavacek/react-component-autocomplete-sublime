@@ -1,26 +1,46 @@
-# Sublime Text React Component Autocomplete
-Work in progress.
+# React Component Autocomplete
+Autocomplete plugin for your own react components.
 
 ## Overview
+
 This sublime package autocompletes your react components.
 When you start typing `<ComponentName...` it searches a specified folder in the project and suggests existing components with their props.
 Once you select a component, it also automatically appends a `require` statement after last existing require, or at the top of the file.
 
-## Limitations
-Right now it only works for `cjsx` components.
+## Getting started
+### Automatic Installation
+Coming soon.
 
-## Installation
+### Manual Installation
+You can clone this repository to the Packages directory of your Sublime installation. In Mac OS Terminal, run:
 
-Clone this repo in your `Packages` folder:
-`git clone git@github.com:pepahlavacek/sublime-react-component-autocomplete.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/ReactAutocomplete/`
+`cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/ReactAutocomplete/`
+`git clone git@github.com:pepahlavacek/react-component-autocomplete-sublime.git`
 
-Add file named `.react-autocomplete` to your project's root folder.
+### Setting up your project
+
+**You need to do this in order to use RCAutocomplete in your project**
+
+Add a file called `.react-autocomplete` to your project's root folder.
+This file should contain just one line with a path to the component folder within that project.
+
+In Terminal, you can run something like this:
+```
+cd my/project/folder
+echo "src/scripts/components" > .react-autocomplete
+```
+
+Where `src/scripts/components` is a relative path to the folder with autocompleted components.
+
+Or you can just add the file manually.
+
 ```
 # .react-autocomplete
 src/scripts/components
 ```
 
-It should only contain a path to the component folder (folder containing components you'd like to autocomplete).
+## Contributing
+This plugin is work in progress and any help is appreciated. Feel free to add an issue if you find a bug, or just fork and open a new PR with a fix or an improvement.
 
 ## To Do
 - [x] Use relative path in `require` statements
@@ -38,5 +58,5 @@ It should only contain a path to the component folder (folder containing compone
 - [ ] Start versioning
 - [ ] Add gifs with usage
 - [ ] Write docs
-- [ ] Add contribution section
+- [x] Add contribution section
 - [ ] Get it ready for package control

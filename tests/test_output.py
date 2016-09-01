@@ -1,7 +1,7 @@
 import unittest
 import os
 import re
-from ReactAutocomplete.output import *
+from ReactComponentAutocomplete.output import *
 
 import sublime
 import sys

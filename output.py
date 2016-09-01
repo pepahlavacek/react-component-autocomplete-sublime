@@ -51,7 +51,7 @@ def get_translated_value(name, syntax):
 def match_one_of_style(pattern_name, translate, prop_type, sub_types, syntax):
   pattern = "^" + pattern_name + "[\(\[]{0,2}([^\)\]]*)[\)\]]{0,2}$"
 
-  if syntax is "JSX":
+  if syntax == "JSX":
     connector = " || "
   else:
     connector = " or "
