@@ -40,10 +40,19 @@ src/scripts/components
 ```
 
 ## Usage
+**Component Autocompletion**: When inside component opening tag (`<`) suggestions will appear. Those are all files inside the folder defined in `.react-autocomplete` and its subfolders.
 
 ![animation of existing component autocompletion](gif/demo-existing.gif)
 
+**Live Reload**: Whenever you update props on a component, they will immediately get registered and they'll show up in autocompleted components.
+
 ![animation of new prop autocompletion](gif/demo-newprop.gif)
+
+**Prop Suggestions**: When you start typing inside an existing component, prop suggestions will show up.
+
+![animation of new prop autocompletion](gif/demo-prop-suggestions.gif)
+
+
 
 
 ## Contributing
@@ -63,7 +72,7 @@ This plugin is work in progress and any help is appreciated. Feel free to add an
 - [x] Ignore comments on prop lines
 - [x] Parse ImmutablePropTypes (or any custom ones) as they come (don't mess up the names)
 - [ ] Start versioning
-- [ ] Add gifs with usage
-- [ ] Write docs
+- [x] Add gifs with usage
+- [x] Write docs (Readme)
 - [x] Add contribution section
 - [ ] Get it ready for package control
