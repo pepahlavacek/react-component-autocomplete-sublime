@@ -12,6 +12,8 @@ class AddRequireCommand(sublime_plugin.TextCommand):
     if not self.view.find(check_pattern, 0):
       relative_path = os.path.relpath(component["path"], os.path.dirname(self.view.file_name()))
       relative_path = os.path.splitext(relative_path)[0]
+      if not relative_path.startswith("."):
+        relative_path = "./" + relative_path
 
       if syntax == "CJSX":
         require_text = "\n{} = require '{}'\n".format(component["display_name"], relative_path)
