@@ -20,8 +20,11 @@ class ReactComponentAutocomplete(sublime_plugin.EventListener):
     self.initial_autocomplete_point = None
     self.loaded_folder = None
 
-  def on_load(self, view):
-    self.preload_files(view)
+  def on_load_async(self, view):
+    self.preload_files(view, False)
+
+  def on_post_save_async(self, view):
+    self.preload_files(view, True)
 
   def find_settings_file(self, view):
     folders = os.path.dirname(view.file_name()).split("/")
@@ -43,7 +46,7 @@ class ReactComponentAutocomplete(sublime_plugin.EventListener):
 
       return component_folder
 
-  def preload_files(self, view):
+  def preload_files(self, view, override=False):
 
     syntax = get_syntax(view.settings().get('syntax'))
 
@@ -53,7 +56,7 @@ class ReactComponentAutocomplete(sublime_plugin.EventListener):
 
     if settings_file:
       component_folder = self.get_component_folder(settings_file)
-      if self.loaded_folder == component_folder:
+      if self.loaded_folder == component_folder and not override:
         # prevent preloading on file browsing
         return
     else:
